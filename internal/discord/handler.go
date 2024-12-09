@@ -73,7 +73,7 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 
 	if strings.ToLower(m.Content) == "!update" {
 		log.Println("Update command received")
-		if time.Since(bh.Tracker.LastUpdate).Minutes() > (15 * time.Minute).Minutes() {
+		if time.Since(bh.Tracker.LastUpdate).Minutes() > 0 {
 			hadUpdates, err := bh.CheckForUpdates()
 			if err != nil {
 				log.Printf("error checking for updates: %v", err)
