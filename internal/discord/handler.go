@@ -141,10 +141,11 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		AOCUser := re.FindStringSubmatch(m.Content)
 		database.UserSignup(m.Author.Username,AOCUser[1])
 	} else if res == "!idupdate" {
-		log.Println("Signup command received")
+		log.Println("ID Update command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
 		AOCUser := re.FindStringSubmatch(m.Content)
-		database.UpdateID(m.Author.Username,AOCUser[1])
+		score := database.Score(m.Author.Username)
+		database.UpdateID(m.Author.Username,AOCUser[1],score)
 	} else if res == "!start" {
 		log.Println("Start command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
