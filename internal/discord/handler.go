@@ -8,9 +8,12 @@ import (
 
 	"log"
 	"strings"
+	"strconv"
 	"time"
 	"regexp"
+	"github.com/WqyJh/go-fstring"
 )
+
 
 type BotHandler struct {
 	Session *discordgo.Session
@@ -130,9 +133,19 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		bh.SendChannelMessage(bh.cfg.ChannelID, sb.String())
 	} else if strings.ToLower(m.Content) == "!comp" {
 		log.Println("Competition command received")
+		var competitors []database.User
+		database.PullCompetitionBoard(&competitors)
 		sb := strings.Builder{}
 		sb.WriteString("```")
-		sb.WriteString("Competition has not started\n\n")
+		for index,user := range competitors {
+			template := "{Place} User: {User} Score: {Score}\n\n"
+			values := map[string]any{"Place": index+1,"User":user.DiscordID,"Score":user.Score}
+			result, err := fstring.Format(template,values)
+			if err != nil {
+				log.Fatal(err)
+			}
+			sb.WriteString(result)
+		}
 		sb.WriteString("```")
 		bh.SendChannelMessage(bh.cfg.ChannelID,sb.String())
 	} else if res == "!signup" {
@@ -150,13 +163,23 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		log.Println("Start command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
 		day := re.FindStringSubmatch(m.Content)
-		log.Println("Update table with day time:",time.Now(),"Day challeng #:",day[1])
+		di, err := strconv.Atoi(day[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		database.InsertDay(m.Author.Username,time.Now(),di)
 	} else if res == "!end" {
 		log.Println("End command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
 		day := re.FindStringSubmatch(m.Content)
-		log.Println("Grab time from table and perform t.Sub(starttime)")
-		log.Println("Update table with completion time:",time.Now(),"Day challeng #:",day[1])
+		di, err := strconv.Atoi(day[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		database.UpdateDay(time.Now(),m.Author.Username,di)
+		start, end := database.GrabTime(m.Author.Username,di)
+		log.Println(start,end)
+		database.UpdateScore(m.Author.Username,start,end)
 	} 
 }
 

@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.23.3
 
 require (
+	github.com/WqyJh/go-fstring v0.4.1 // indirect
 	github.com/bwmarrin/discordgo v0.27.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
