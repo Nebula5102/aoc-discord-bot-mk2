@@ -5,6 +5,7 @@ import (
 	"github.com/Nebula5102/aoc-discord-bot-mk2/internal/config"
 	"github.com/Nebula5102/aoc-discord-bot-mk2/internal/discord"
 	"github.com/Nebula5102/aoc-discord-bot-mk2/internal/leaderboard"
+	"github.com/Nebula5102/aoc-discord-bot-mk2/database"
 
 	"log"
 	"os"
@@ -17,6 +18,8 @@ import (
 )
 
 func main() {
+	database.InitTables()
+
 	cfg := loadConfig()
 
 	session := createDiscordSession(cfg)
@@ -26,7 +29,6 @@ func main() {
 	tracker := initTracker(cfg, storedLeaderboard)
 
 	bot := initBotHandler(session, tracker, cfg)
-
 	session.AddHandler(bot.MessageReceived)
 
 	setupSignalHandling(session, bot)

@@ -3,6 +3,7 @@ package discord
 import (
 	"github.com/Nebula5102/aoc-discord-bot-mk2/internal/config"
 	"github.com/Nebula5102/aoc-discord-bot-mk2/internal/leaderboard"
+	"github.com/Nebula5102/aoc-discord-bot-mk2/database"
 	"github.com/bwmarrin/discordgo"
 
 	"log"
@@ -73,12 +74,15 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 	}
 
 	signup := regexp.MustCompile(`!signup`)
+	idupdate := regexp.MustCompile(`!idupdate`)
 	start := regexp.MustCompile(`!start`)
 	end := regexp.MustCompile(`!end`)
 
 	res := "" 
 	for i := 0; i<1; i++ {
 		res = signup.FindString(strings.ToLower(m.Content))
+		if res != "" {break}
+		res = idupdate.FindString(strings.ToLower(m.Content))
 		if res != "" {break}
 		res = start.FindString(strings.ToLower(m.Content))
 		if res != "" {break}
@@ -118,6 +122,7 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		sb.WriteString("!stars - Shows the current stars\n\n")
 		sb.WriteString("!comp - Displays current competition leaderboard, if there is one\n\n")
 		sb.WriteString("!signup<AOCid> - Signs you up to the competition, if there is one\n\n")
+		sb.WriteString("!idupdate<AOCid> - Signs you up to the competition, if there is one\n\n")
 		sb.WriteString("!start<Day Number> - Sets start time for the AOC day challenge\n\n")
 		sb.WriteString("!end<Day Number> - Sets end time for the AOC day challenge\n\n")
 		sb.WriteString("!help - Shows this message\n")
@@ -134,7 +139,12 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		log.Println("Signup command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
 		AOCUser := re.FindStringSubmatch(m.Content)
-		log.Println("Update table with Discord user:",m.Author,"AOCUser:",AOCUser[1])
+		database.UserSignup(m.Author.Username,AOCUser[1])
+	} else if res == "!idupdate" {
+		log.Println("Signup command received")
+		re := regexp.MustCompile(`<([^>]+)>`)
+		AOCUser := re.FindStringSubmatch(m.Content)
+		database.UpdateID(m.Author.Username,AOCUser[1])
 	} else if res == "!start" {
 		log.Println("Start command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
