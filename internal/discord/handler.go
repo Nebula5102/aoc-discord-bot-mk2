@@ -80,6 +80,7 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 	idupdate := regexp.MustCompile(`!idupdate`)
 	start := regexp.MustCompile(`!start`)
 	end := regexp.MustCompile(`!end`)
+	resetscore := regexp.MustCompile(`!resetscore`)
 
 	res := "" 
 	for i := 0; i<1; i++ {
@@ -90,6 +91,8 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		res = start.FindString(strings.ToLower(m.Content))
 		if res != "" {break}
 		res = end.FindString(strings.ToLower(m.Content))
+		if res != "" {break}
+		res = resetscore.FindString(strings.ToLower(m.Content))
 		if res != "" {break}
 	}
 
@@ -179,8 +182,23 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		database.UpdateDay(time.Now(),m.Author.Username,di)
 		start, end := database.GrabTime(m.Author.Username,di)
 		log.Println(start,end)
-		database.UpdateScore(m.Author.Username,start,end)
-	} 
+		if di >= 10 {
+			database.UpdateScore(m.Author.Username,start,end)
+		}
+	}  else if res == "!resetscore" {
+		log.Println("Signup command received")
+		re := regexp.MustCompile(`<([^>]+)>`)
+		AOCUser := re.FindStringSubmatch(m.Content)
+		if m.Author.Username == "nebula5102" {
+			database.UserResetScore(AOCUser[1])
+		} else {
+			sb := strings.Builder{}
+			sb.WriteString("```")
+			sb.WriteString("You are not an authorized user")
+			sb.WriteString("```")
+			bh.SendChannelMessage(bh.cfg.ChannelID, sb.String())
+		}
+	}
 }
 
 func (bh *BotHandler) SendChannelMessage(channelID, message string) {

@@ -220,4 +220,15 @@ func UpdateScore(discordID string, st time.Time, et time.Time) {
 	if err != nil {
 		log.Fatal(err)
 	}
+} 
+
+func UserResetScore(aocID string) {
+	db, err := sql.Open("sqlite3",fileDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = db.Exec(`UPDATE USER SET score = 0 WHERE aocID = ?`,aocID)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
