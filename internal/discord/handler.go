@@ -141,7 +141,7 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 		sb := strings.Builder{}
 		sb.WriteString("```")
 		for index,user := range competitors {
-			template := "{Place} User: {User} Score: {Score}\n\n"
+			template := "{Place} User: {User} Score: {Score}\n"
 			values := map[string]any{"Place": index+1,"User":user.DiscordID,"Score":user.Score}
 			result, err := fstring.Format(template,values)
 			if err != nil {
@@ -171,6 +171,17 @@ func (bh *BotHandler) MessageReceived(s *discordgo.Session, m *discordgo.Message
 			log.Fatal(err)
 		}
 		database.InsertDay(m.Author.Username,time.Now(),di)
+		sb := strings.Builder{}
+		sb.WriteString("```")
+		template := "{User} has started day {Day}\n"
+		values := map[string]any{"User":m.Author.Username,"Day":di}
+		result, err := fstring.Format(template,values)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sb.WriteString(result)
+		sb.WriteString("```")
+		bh.SendChannelMessage(bh.cfg.ChannelID, sb.String())
 	} else if res == "!end" {
 		log.Println("End command received")
 		re := regexp.MustCompile(`<([^>]+)>`)
